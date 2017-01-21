@@ -1,0 +1,18 @@
+language: scala
+sudo: false
+script:
+- git config core.whitespace tab-in-indent,trailing-space,space-before-tab,cr-at-eol
+- git show --oneline --check
+- sbt scalafmtTest test
+- find $HOME/.ivy2/cache -name "ivydata-*.properties" | xargs rm
+- find $HOME/.ivy2/cache -name "*SNAPSHOT*" | xargs rm -rf
+jdk:
+- oraclejdk8
+addons:
+  apt:
+    packages:
+    - oracle-java8-installer
+cache:
+  directories:
+  - $HOME/.ivy2/cache
+  - $HOME/.sbt/launchers

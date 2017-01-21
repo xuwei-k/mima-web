@@ -1,0 +1,41 @@
+package mima
+
+import org.scalatest.FunSpec
+import unfiltered.jetty.Server
+
+import scalaj.http._
+
+class MimaWebTest extends FunSpec {
+
+  def withServer[A](action: Int => A): A = {
+    val server = Server.anylocal
+    server.plan(MimaWeb).start()
+    try {
+      action(server.ports.headOption.getOrElse(sys.error("ports empty!?")))
+    } finally {
+      server.stop()
+    }
+  }
+
+  val expect =
+    """abstract method ToAssociativeOps(java.lang.Object,scalaz.Associative)scalaz.syntax.AssociativeOps in trait scalaz.syntax.ToAssociativeOps is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
+    |abstract method ToAssociativeOpsUnapply(java.lang.Object,scalaz.Unapply2)scalaz.syntax.AssociativeOps in trait scalaz.syntax.ToAssociativeOps0 is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
+    |abstract method ToAssociativeVFromKleisliLike(java.lang.Object,scalaz.Associative)scalaz.syntax.AssociativeOps in trait scalaz.syntax.ToAssociativeOps is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
+    |abstract method ToProChoiceOps(java.lang.Object,scalaz.ProChoice)scalaz.syntax.ProChoiceOps in trait scalaz.syntax.ToProChoiceOps is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
+    |abstract method ToProChoiceOpsUnapply(java.lang.Object,scalaz.Unapply2)scalaz.syntax.ProChoiceOps in trait scalaz.syntax.ToProChoiceOps0 is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
+    |abstract method ToProChoiceVFromKleisliLike(java.lang.Object,scalaz.ProChoice)scalaz.syntax.ProChoiceOps in trait scalaz.syntax.ToProChoiceOps is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.""".stripMargin
+
+  it("MimaWeb") {
+    withServer { port =>
+      // https://github.com/scalaz/scalaz/issues/1199
+      val request =
+        Http(s"http://localhost:$port/org.scalaz/scalaz-core_2.11")
+          .param("previous", "7.1.0")
+          .param("current", "7.1.1")
+          .options(MimaWeb.defaultOptions)
+      val response = request.asString
+      assert(response.code == 200)
+      assert(response.body == expect)
+    }
+  }
+}
