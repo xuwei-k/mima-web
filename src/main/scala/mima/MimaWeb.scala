@@ -136,6 +136,10 @@ object MimaWeb extends unfiltered.filter.Plan {
         case Left(error) =>
           InternalServerError ~> ResponseString(error)
       }
+
+    case GET(Path(Seg(Nil))) =>
+      val url = "https://github.com/xuwei-k/mima-web"
+      returnHtml(<h1><a href={url}>{url}</a></h1>)
   }
 
   private def versions(baseUrl: String, groupId: String, artifactId: String): Either[String, List[String]] =
