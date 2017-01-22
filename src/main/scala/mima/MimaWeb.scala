@@ -7,10 +7,12 @@ import sbt.io.IO
 import unfiltered.filter.Plan.Intent
 import unfiltered.jetty.{Server, SocketPortBinding}
 import unfiltered.request._
-import unfiltered.response.{Ok, ResponseString, Status}
+import unfiltered.response.{Html5, InternalServerError, Ok, ResponseString, Status}
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.util.control.NonFatal
+import scala.xml.{Elem, XML}
 import scalaj.http.HttpOptions
 import scalaz.Nondeterminism
 
@@ -35,8 +37,14 @@ object MimaWeb extends unfiltered.filter.Plan {
     }(ExecutionContext.global)
   }
 
-  private[this] val cache: Cache[Library, Array[Byte], Int] =
+  private[this] val cacheJars: Cache[Library, Array[Byte], Int] =
     new Cache(download)
+  private[this] val cacheArtifacts: Cache[String, List[String], httpz.Error] =
+    new Cache(MavenSearch.searchByGroupId)
+  private[this] val cacheVersions: Cache[(String, String), List[String], String] =
+    new Cache({ x =>
+      Future(versions(Library.MavenCentral, x._1, x._2))(ExecutionContext.global)
+    })
 
   class StrParam(val name: String) {
     def unapply(p: Params.Map): Option[String] =
@@ -49,11 +57,37 @@ object MimaWeb extends unfiltered.filter.Plan {
   private[this] val instance: Nondeterminism[Future] =
     scalaz.std.scalaFuture.futureInstance(ExecutionContext.global)
 
+  private def returnHtml(x: Elem) = Html5(
+    <html>
+      <head>
+        <title>migration-manager web API</title>
+        <meta name="robots" content="noindex,nofollow" />
+      </head>
+      <body><div>{x}</div></body>
+    </html>
+  )
+
+  private final val baseURL = "https://migration-manager.herokuapp.com/"
+
   override val intent: Intent = {
+    case GET(Path(Seg(groupId :: Nil))) =>
+      Await.result(cacheArtifacts.get(groupId), 29.seconds) match {
+        case Left(e) =>
+          InternalServerError ~> ResponseString(e.toString)
+        case Right(artifacts) =>
+          returnHtml(
+            <div>{
+              artifacts.map{ a =>
+                <li><a href={s"${baseURL}$groupId/${a}"}>{a}</a></li>
+              }
+            }</div>
+          )
+      }
+
     case GET(Path(Seg(groupId :: artifactId :: Nil)) & Params(Previous(p) & Current(c))) =>
       val previous = Library(groupId, artifactId, p)
       val current = Library(groupId, artifactId, c)
-      val result = instance.mapBoth(cache.get(previous), cache.get(current)) {
+      val result = instance.mapBoth(cacheJars.get(previous), cacheJars.get(current)) {
         case (Right(x), Right(y)) =>
           val problems = IO.withTemporaryDirectory { dir =>
             val p = new File(dir, previous.name)
@@ -75,7 +109,52 @@ object MimaWeb extends unfiltered.filter.Plan {
           Status(code) ~> ResponseString(s"status = $code. error while downloading ${current.mavenCentralURL}")
       }
       Await.result(result, 29.seconds)
+
+    case GET(Path(Seg(groupId :: artifactId :: Nil))) & Params(params) =>
+      Await.result(cacheVersions.get((groupId, artifactId)), 29.seconds) match {
+        case Right(xs) =>
+          def v(p: StrParam) = {
+            p.unapply(params) match {
+              case Some(x) => x :: Nil
+              case None => xs
+            }
+          }
+
+          Ok ~> returnHtml(<div>
+            {for {
+              previous <- v(Previous)
+              current <- v(Current)
+              if previous != current
+            } yield {
+              <li>
+                <a target="_brank" href={s"$baseURL$groupId/$artifactId?previous=$previous&current=$current"}>
+                  {s"previous=$previous current=$current"}
+                </a>
+              </li>
+            }}
+          </div>)
+        case Left(error) =>
+          InternalServerError ~> ResponseString(error)
+      }
   }
+
+  private def versions(baseUrl: String, groupId: String, artifactId: String): Either[String, List[String]] =
+    metadataXml(baseUrl, groupId, artifactId).right.map { x =>
+      (x \\ "version").map(_.text).toList.sorted
+    }
+
+  private def metadataXml(baseUrl: String, groupId: String, artifactId: String): Either[String, Elem] =
+    try {
+      val url = s"$baseUrl${groupId.replace('.', '/')}/$artifactId/maven-metadata.xml"
+      println(s"downloading $url")
+      Right(XML.load(url))
+    } catch {
+      case e: _root_.org.xml.sax.SAXParseException => // ignore
+        Left(e.toString)
+      case NonFatal(e) =>
+        e.printStackTrace()
+        Left(e.toString)
+    }
 
   def main(args: Array[String]): Unit = {
     val port = util.Try { System.getenv("PORT").toInt }.getOrElse(8080)

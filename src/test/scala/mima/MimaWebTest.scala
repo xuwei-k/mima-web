@@ -36,6 +36,19 @@ class MimaWebTest extends FunSpec {
       val response = request.asString
       assert(response.code == 200)
       assert(response.body == expect)
+
+      val artifacts = Http(s"http://localhost:$port/org.scalaz")
+      val res1 = artifacts.asString
+      assert(res1.code == 200, res1.body)
+
+      val versions1 = Http(s"http://localhost:$port/org.scalaz/scalaz-core_2.12")
+      val res2 = versions1.asString
+      assert(res2.code == 200, res2.body)
+
+      val versions2 = Http(s"http://localhost:$port/org.scalaz/scalaz-core_2.12?current=7.2.8")
+      val res3 = versions2.asString
+      assert(res3.code == 200, res3.body)
+      assert(res2.body.length > res3.body.length)
     }
   }
 }
