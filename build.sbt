@@ -17,7 +17,7 @@ libraryDependencies ++= Seq(
   "io.argonaut" %% "argonaut-scalaz" % "6.2.2",
   "com.github.xuwei-k" %% "httpz-native" % "0.5.1",
   "org.scalaj" %% "scalaj-http" % "2.4.1",
-  "org.scalaz" %% "scalaz-core" % "7.2.26"
+  "org.scalaz" %% "scalaz-core" % "7.2.27"
 )
 
 enablePlugins(JavaAppPackaging)
