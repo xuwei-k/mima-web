@@ -6,12 +6,9 @@ script:
 - sbt scalafmtTest test
 - find $HOME/.ivy2/cache -name "ivydata-*.properties" | xargs rm
 - find $HOME/.ivy2/cache -name "*SNAPSHOT*" | xargs rm -rf
+dist: xenial
 jdk:
-- oraclejdk8
-addons:
-  apt:
-    packages:
-    - oracle-java8-installer
+- openjdk8
 cache:
   directories:
   - $HOME/.ivy2/cache
