@@ -4,7 +4,7 @@ licenses += ("MIT License" -> url("http://www.opensource.org/licenses/mit-licens
 
 scalaVersion := "2.12.8"
 
-scalacOptions ++= "-deprecation" :: "unchecked" :: "-feature" :: Nil
+scalacOptions ++= "-deprecation" :: "-unchecked" :: "-feature" :: Nil
 
 val unfilteredVersion = "0.9.1"
 
