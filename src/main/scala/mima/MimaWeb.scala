@@ -2,7 +2,8 @@ package mima
 
 import java.io.File
 
-import com.typesafe.tools.mima.cli.Main
+import com.typesafe.tools.mima.core.Problem
+import com.typesafe.tools.mima.core.util.log.Logging
 import sbt.io.IO
 import unfiltered.filter.Plan.Intent
 import unfiltered.jetty.{Server, SocketPortBinding}
@@ -15,6 +16,8 @@ import scala.util.control.NonFatal
 import scala.xml.{Elem, XML}
 import scalaj.http.HttpOptions
 import scalaz.Nondeterminism
+
+import scala.collection.mutable.ListBuffer
 
 object MimaWeb extends unfiltered.filter.Plan {
 
@@ -77,31 +80,37 @@ object MimaWeb extends unfiltered.filter.Plan {
         case Right(artifacts) =>
           returnHtml(
             <div>{
-              artifacts.map{ a =>
+              artifacts.map { a =>
                 <li><a href={s"${baseURL}$groupId/${a}"}>{a}</a></li>
               }
             }</div>
           )
       }
 
-    case GET(Path(Seg(groupId :: artifactId :: Nil)) & Params(Previous(p) & Current(c))) =>
+    case GET(Path(Seg(groupId :: artifactId :: Nil)) & Params(param @ Previous(p) & Current(c))) =>
+      val debug = param.get("debug").exists(_.contains("true"))
       val previous = Library(groupId, artifactId, p)
       val current = Library(groupId, artifactId, c)
       val result = instance.mapBoth(cacheJars.get(previous), cacheJars.get(current)) {
         case (Right(x), Right(y)) =>
-          val problems = IO.withTemporaryDirectory { dir =>
+          val (problems, log) = IO.withTemporaryDirectory { dir =>
             val p = new File(dir, previous.name)
             val c = new File(dir, current.name)
             IO.write(p, x)
             IO.write(c, y)
             runMima(p.getAbsolutePath, c.getAbsolutePath)
           }
-          val res = if (problems.isEmpty) {
+          val res0 = if (problems.isEmpty) {
             "Found 0 binary incompatibilities"
           } else {
             problems.map(_.description(current.name)).sorted.mkString("\n")
           }
-          println(res)
+          println(res0)
+          val res = if (debug) {
+            res0 + "\n" + log.mkString("\n")
+          } else {
+            res0
+          }
           Ok ~> ResponseString(res)
         case (Left(code), _) =>
           Status(code) ~> ResponseString(s"status = $code. error while downloading ${current.mavenCentralURL}")
@@ -116,12 +125,13 @@ object MimaWeb extends unfiltered.filter.Plan {
           def v(p: StrParam) = {
             p.unapply(params) match {
               case Some(x) => x :: Nil
-              case None => xs
+              case None    => xs
             }
           }
 
           Ok ~> returnHtml(<div>
-            {for {
+            {
+            for {
               previous <- v(Previous)
               current <- v(Current)
               if previous != current
@@ -131,7 +141,8 @@ object MimaWeb extends unfiltered.filter.Plan {
                   {s"previous=$previous current=$current"}
                 </a>
               </li>
-            }}
+            }
+          }
           </div>)
         case Left(error) =>
           InternalServerError ~> ResponseString(error)
@@ -166,9 +177,30 @@ object MimaWeb extends unfiltered.filter.Plan {
     Server.portBinding(binding).plan(this).run()
   }
 
-  private def runMima(previous: String, current: String) = {
-    val m = new Main(Nil)
-    val mima = m.makeMima
-    mima.collectProblems(previous, current)
+  private def runMima(previous: String, current: String): (List[Problem], List[String]) = {
+    val buf = new ListBuffer[String]
+    val logger = new Logging {
+      override def debugLog(str: String): Unit = {}
+      override def error(str: String): Unit = {
+        val x = s"[error] $str"
+        println(x)
+        buf += x
+      }
+      override def info(str: String): Unit = {
+        val x = s"[info] $str"
+        println(x)
+        buf += x
+      }
+      override def warn(str: String): Unit = {
+        val x = s"[warn] $str"
+        println(x)
+        buf += x
+      }
+    }
+    com.typesafe.tools.mima.core.Config.setup("conscript-mima", Array.empty)
+    val classpath = com.typesafe.tools.mima.core.reporterClassPath("")
+    val m = new com.typesafe.tools.mima.lib.MiMaLib(classpath, logger)
+    val problems = m.collectProblems(previous, current)
+    (problems, buf.toList)
   }
 }

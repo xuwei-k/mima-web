@@ -3,7 +3,8 @@ sudo: false
 script:
 - git config core.whitespace tab-in-indent,trailing-space,space-before-tab,cr-at-eol
 - git show --oneline --check
-- sbt scalafmtTest test
+- sbt scalafmtCheck scalafmtSbtCheck test:scalafmtCheck test
+before_cache:
 - find $HOME/.ivy2/cache -name "ivydata-*.properties" | xargs rm
 - find $HOME/.ivy2/cache -name "*SNAPSHOT*" | xargs rm -rf
 dist: xenial
