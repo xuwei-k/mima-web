@@ -197,7 +197,7 @@ object MimaWeb extends unfiltered.filter.Plan {
         buf += x
       }
     }
-    com.typesafe.tools.mima.core.Config.setup("conscript-mima", Array.empty)
+    com.typesafe.tools.mima.core.Config.setup("mima-web", Array.empty)
     val classpath = com.typesafe.tools.mima.core.reporterClassPath("")
     val m = new com.typesafe.tools.mima.lib.MiMaLib(classpath, logger)
     val problems = m.collectProblems(previous, current)
