@@ -18,12 +18,12 @@ class MimaWebTest extends FunSpec {
   }
 
   val expect =
-    """abstract method ToAssociativeOps(java.lang.Object,scalaz.Associative)scalaz.syntax.AssociativeOps in trait scalaz.syntax.ToAssociativeOps is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
-    |abstract method ToAssociativeOpsUnapply(java.lang.Object,scalaz.Unapply2)scalaz.syntax.AssociativeOps in trait scalaz.syntax.ToAssociativeOps0 is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
-    |abstract method ToAssociativeVFromKleisliLike(java.lang.Object,scalaz.Associative)scalaz.syntax.AssociativeOps in trait scalaz.syntax.ToAssociativeOps is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
-    |abstract method ToProChoiceOps(java.lang.Object,scalaz.ProChoice)scalaz.syntax.ProChoiceOps in trait scalaz.syntax.ToProChoiceOps is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
-    |abstract method ToProChoiceOpsUnapply(java.lang.Object,scalaz.Unapply2)scalaz.syntax.ProChoiceOps in trait scalaz.syntax.ToProChoiceOps0 is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
-    |abstract method ToProChoiceVFromKleisliLike(java.lang.Object,scalaz.ProChoice)scalaz.syntax.ProChoiceOps in trait scalaz.syntax.ToProChoiceOps is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.""".stripMargin
+    """method ToAssociativeOps(java.lang.Object,scalaz.Associative)scalaz.syntax.AssociativeOps in trait scalaz.syntax.ToAssociativeOps is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
+    |method ToAssociativeOpsUnapply(java.lang.Object,scalaz.Unapply2)scalaz.syntax.AssociativeOps in trait scalaz.syntax.ToAssociativeOps0 is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
+    |method ToAssociativeVFromKleisliLike(java.lang.Object,scalaz.Associative)scalaz.syntax.AssociativeOps in trait scalaz.syntax.ToAssociativeOps is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
+    |method ToProChoiceOps(java.lang.Object,scalaz.ProChoice)scalaz.syntax.ProChoiceOps in trait scalaz.syntax.ToProChoiceOps is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
+    |method ToProChoiceOpsUnapply(java.lang.Object,scalaz.Unapply2)scalaz.syntax.ProChoiceOps in trait scalaz.syntax.ToProChoiceOps0 is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
+    |method ToProChoiceVFromKleisliLike(java.lang.Object,scalaz.ProChoice)scalaz.syntax.ProChoiceOps in trait scalaz.syntax.ToProChoiceOps is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.""".stripMargin
 
   it("MimaWeb") {
     withServer { port =>
