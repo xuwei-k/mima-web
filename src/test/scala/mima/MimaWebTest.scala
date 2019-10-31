@@ -6,7 +6,6 @@ import unfiltered.jetty.Server
 import scalaj.http._
 
 class MimaWebTest extends FunSpec {
-
   def withServer[A](action: Int => A): A = {
     val server = Server.anylocal
     server.plan(MimaWeb).start()
