@@ -61,5 +61,4 @@ object MavenSearch {
         "docs"
       )
   }
-
 }

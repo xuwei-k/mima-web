@@ -20,7 +20,6 @@ import scalaz.Nondeterminism
 import scala.collection.mutable.ListBuffer
 
 object MimaWeb extends unfiltered.filter.Plan {
-
   val defaultOptions: Seq[HttpOptions.HttpOption] = Seq(
     _.setConnectTimeout(30000),
     _.setReadTimeout(30000)
