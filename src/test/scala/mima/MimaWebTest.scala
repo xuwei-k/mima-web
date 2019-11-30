@@ -1,11 +1,11 @@
 package mima
 
-import org.scalatest.FunSpec
 import unfiltered.jetty.Server
 
 import scalaj.http._
+import org.scalatest.funspec.AnyFunSpec
 
-class MimaWebTest extends FunSpec {
+class MimaWebTest extends AnyFunSpec {
   def withServer[A](action: Int => A): A = {
     val server = Server.anylocal
     server.plan(MimaWeb).start()
