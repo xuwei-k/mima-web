@@ -44,9 +44,7 @@ object MimaWeb extends unfiltered.filter.Plan {
   private[this] val cacheArtifacts: Cache[String, List[String], httpz.Error] =
     new Cache(MavenSearch.searchByGroupId)
   private[this] val cacheVersions: Cache[(String, String), List[String], String] =
-    new Cache({ x =>
-      Future(versions(Library.MavenCentral, x._1, x._2))(ExecutionContext.global)
-    })
+    new Cache({ x => Future(versions(Library.MavenCentral, x._1, x._2))(ExecutionContext.global) })
 
   class StrParam(val name: String) {
     def unapply(p: Params.Map): Option[String] =
@@ -79,9 +77,7 @@ object MimaWeb extends unfiltered.filter.Plan {
         case Right(artifacts) =>
           returnHtml(
             <div>{
-              artifacts.map { a =>
-                <li><a href={s"${baseURL}$groupId/${a}"}>{a}</a></li>
-              }
+              artifacts.map { a => <li><a href={s"${baseURL}$groupId/${a}"}>{a}</a></li> }
             }</div>
           )
       }
@@ -153,9 +149,7 @@ object MimaWeb extends unfiltered.filter.Plan {
   }
 
   private def versions(baseUrl: String, groupId: String, artifactId: String): Either[String, List[String]] =
-    metadataXml(baseUrl, groupId, artifactId).right.map { x =>
-      (x \\ "version").map(_.text).toList.sorted
-    }
+    metadataXml(baseUrl, groupId, artifactId).right.map { x => (x \\ "version").map(_.text).toList.sorted }
 
   private def metadataXml(baseUrl: String, groupId: String, artifactId: String): Either[String, Elem] =
     try {
