@@ -57,15 +57,16 @@ object MimaWeb extends unfiltered.filter.Plan {
   private[this] val instance: Nondeterminism[Future] =
     scalaz.std.scalaFuture.futureInstance(ExecutionContext.global)
 
-  private def returnHtml(x: Elem) = Html5(
-    <html>
+  private def returnHtml(x: Elem) =
+    Html5(
+      <html>
       <head>
         <title>migration-manager web API</title>
         <meta name="robots" content="noindex,nofollow" />
       </head>
       <body><div>{x}</div></body>
     </html>
-  )
+    )
 
   private final val baseURL = "https://migration-manager.herokuapp.com/"
 
