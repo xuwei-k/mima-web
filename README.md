@@ -1,4 +1,4 @@
-# mima-web [![Build Status](https://travis-ci.com/xuwei-k/mima-web.svg?branch=master)](https://travis-ci.com/xuwei-k/mima-web)
+# mima-web
 
 ## example
 
