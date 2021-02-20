@@ -11,7 +11,7 @@ val unfilteredVersion = "0.10.1"
 libraryDependencies ++= Seq(
   "ws.unfiltered" %% "unfiltered-filter" % unfilteredVersion,
   "ws.unfiltered" %% "unfiltered-jetty" % unfilteredVersion,
-  "org.scalatest" %% "scalatest" % "3.2.4" % "test",
+  "org.scalatest" %% "scalatest" % "3.2.5" % "test",
   "com.typesafe" %% "mima-core" % "0.6.1",
   "org.scala-sbt" %% "io" % "1.4.0",
   "io.argonaut" %% "argonaut-scalaz" % "6.3.3",
