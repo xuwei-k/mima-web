@@ -6,7 +6,7 @@ scalaVersion := "2.12.11"
 
 scalacOptions ++= "-deprecation" :: "-unchecked" :: "-feature" :: Nil
 
-val unfilteredVersion = "0.10.2"
+val unfilteredVersion = "0.10.3"
 
 libraryDependencies ++= Seq(
   "ws.unfiltered" %% "unfiltered-filter" % unfilteredVersion,
