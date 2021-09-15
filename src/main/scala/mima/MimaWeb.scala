@@ -94,7 +94,7 @@ object MimaWeb extends unfiltered.filter.Plan {
             val c = new File(dir, current.name)
             IO.write(p, x)
             IO.write(c, y)
-            runMima(p.getAbsolutePath, c.getAbsolutePath)
+            runMima(p, c)
           }
           val res0 = if (problems.isEmpty) {
             "Found 0 binary incompatibilities"
@@ -150,7 +150,7 @@ object MimaWeb extends unfiltered.filter.Plan {
   }
 
   private def versions(baseUrl: String, groupId: String, artifactId: String): Either[String, List[String]] =
-    metadataXml(baseUrl, groupId, artifactId).right.map { x => (x \\ "version").map(_.text).toList.sorted }
+    metadataXml(baseUrl, groupId, artifactId).map { x => (x \\ "version").map(_.text).toList.sorted }
 
   private def metadataXml(baseUrl: String, groupId: String, artifactId: String): Either[String, Elem] =
     try {
@@ -171,17 +171,11 @@ object MimaWeb extends unfiltered.filter.Plan {
     Server.portBinding(binding).plan(this).run()
   }
 
-  private def runMima(previous: String, current: String): (List[Problem], List[String]) = {
+  private def runMima(previous: File, current: File): (List[Problem], List[String]) = {
     val buf = new ListBuffer[String]
     val logger = new Logging {
-      override def debugLog(str: String): Unit = {}
       override def error(str: String): Unit = {
         val x = s"[error] $str"
-        println(x)
-        buf += x
-      }
-      override def info(str: String): Unit = {
-        val x = s"[info] $str"
         println(x)
         buf += x
       }
@@ -190,11 +184,25 @@ object MimaWeb extends unfiltered.filter.Plan {
         println(x)
         buf += x
       }
+
+      override def verbose(str: String): Unit = {
+        val x = s"[verbose] $str"
+        println(x)
+        buf += x
+      }
+
+      override def debug(str: String): Unit = {
+        val x = s"[debug] $str"
+        println(x)
+        buf += x
+      }
     }
-    com.typesafe.tools.mima.core.Config.setup("mima-web", Array.empty)
-    val classpath = com.typesafe.tools.mima.core.reporterClassPath("")
-    val m = new com.typesafe.tools.mima.lib.MiMaLib(classpath, logger)
-    val problems = m.collectProblems(previous, current)
+    val m = new com.typesafe.tools.mima.lib.MiMaLib(Nil, logger)
+    val problems = m.collectProblems(
+      oldJarOrDir = previous,
+      newJarOrDir = current,
+      excludeAnnots = Nil
+    )
     (problems, buf.toList)
   }
 }
