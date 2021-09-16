@@ -15,7 +15,7 @@ libraryDependencies ++= Seq(
   "com.typesafe" %% "mima-core" % "1.0.0",
   "org.scala-sbt" %% "io" % "1.5.1",
   "io.argonaut" %% "argonaut-scalaz" % "6.3.6",
-  "com.github.xuwei-k" %% "httpz-native" % "0.7.0",
+  "com.github.xuwei-k" %% "httpz-native" % "0.8.0",
   "org.scalaj" %% "scalaj-http" % "2.4.2"
 )
 
