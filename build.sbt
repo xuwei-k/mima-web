@@ -2,7 +2,7 @@ name := "mima-web"
 
 licenses += ("MIT License" -> url("http://www.opensource.org/licenses/mit-license"))
 
-scalaVersion := "2.13.11"
+scalaVersion := "2.13.12"
 
 scalacOptions ++= "-deprecation" :: "-unchecked" :: "-feature" :: Nil
 
