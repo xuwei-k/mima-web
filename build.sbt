@@ -12,7 +12,7 @@ libraryDependencies ++= Seq(
   "ws.unfiltered" %% "unfiltered-filter" % unfilteredVersion,
   "ws.unfiltered" %% "unfiltered-jetty" % unfilteredVersion,
   "org.scalatest" %% "scalatest" % "3.2.19" % "test",
-  "com.typesafe" %% "mima-core" % "1.1.3",
+  "com.typesafe" %% "mima-core" % "1.1.4",
   "org.scala-sbt" %% "io" % "1.10.0",
   "io.argonaut" %% "argonaut-scalaz" % "6.3.10",
   "com.github.xuwei-k" %% "httpz-native" % "0.8.0",
