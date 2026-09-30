@@ -20,4 +20,4 @@ jobs:
            --server
            scalafmtCheckAll
            scalafmtSbtCheck
-           "+test"
+           "+testFull"
