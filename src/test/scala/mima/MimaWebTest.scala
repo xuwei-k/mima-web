@@ -17,12 +17,23 @@ class MimaWebTest extends AnyFunSpec {
   }
 
   val expect =
-    """method ToAssociativeOps(java.lang.Object,scalaz.Associative)scalaz.syntax.AssociativeOps in trait scalaz.syntax.ToAssociativeOps is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
-    |method ToAssociativeOpsUnapply(java.lang.Object,scalaz.Unapply2)scalaz.syntax.AssociativeOps in trait scalaz.syntax.ToAssociativeOps0 is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
-    |method ToAssociativeVFromKleisliLike(java.lang.Object,scalaz.Associative)scalaz.syntax.AssociativeOps in trait scalaz.syntax.ToAssociativeOps is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
-    |method ToProChoiceOps(java.lang.Object,scalaz.ProChoice)scalaz.syntax.ProChoiceOps in trait scalaz.syntax.ToProChoiceOps is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
-    |method ToProChoiceOpsUnapply(java.lang.Object,scalaz.Unapply2)scalaz.syntax.ProChoiceOps in trait scalaz.syntax.ToProChoiceOps0 is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
-    |method ToProChoiceVFromKleisliLike(java.lang.Object,scalaz.ProChoice)scalaz.syntax.ProChoiceOps in trait scalaz.syntax.ToProChoiceOps is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.""".stripMargin
+    """abstract method ToAssociativeOps(java.lang.Object,scalaz.Associative)scalaz.syntax.AssociativeOps in trait scalaz.syntax.ToAssociativeOps is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
+    |abstract method ToAssociativeOpsUnapply(java.lang.Object,scalaz.Unapply2)scalaz.syntax.AssociativeOps in trait scalaz.syntax.ToAssociativeOps0 is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
+    |abstract method ToAssociativeVFromKleisliLike(java.lang.Object,scalaz.Associative)scalaz.syntax.AssociativeOps in trait scalaz.syntax.ToAssociativeOps is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
+    |abstract method ToProChoiceOps(java.lang.Object,scalaz.ProChoice)scalaz.syntax.ProChoiceOps in trait scalaz.syntax.ToProChoiceOps is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
+    |abstract method ToProChoiceOpsUnapply(java.lang.Object,scalaz.Unapply2)scalaz.syntax.ProChoiceOps in trait scalaz.syntax.ToProChoiceOps0 is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
+    |abstract method ToProChoiceVFromKleisliLike(java.lang.Object,scalaz.ProChoice)scalaz.syntax.ProChoiceOps in trait scalaz.syntax.ToProChoiceOps is inherited by class ToTypeClassOps in scalaz-core_2.11-7.1.1.jar version.
+    |class scalaz.Monoid#ApplicativeMonoid#class is not part of the API in scalaz-core_2.11-7.1.1.jar version, so a later change to it will no longer be reported, though it would break clients using it today
+    |class scalaz.Semigroup#ApplySemigroup#class is not part of the API in scalaz-core_2.11-7.1.1.jar version, so a later change to it will no longer be reported, though it would break clients using it today
+    |class scalaz.std.Tuple1Cozip#class is not part of the API in scalaz-core_2.11-7.1.1.jar version, so a later change to it will no longer be reported, though it would break clients using it today
+    |class scalaz.std.Tuple1Functor#class is not part of the API in scalaz-core_2.11-7.1.1.jar version, so a later change to it will no longer be reported, though it would break clients using it today
+    |class scalaz.std.Tuple1Monad#class is not part of the API in scalaz-core_2.11-7.1.1.jar version, so a later change to it will no longer be reported, though it would break clients using it today
+    |private trait scalaz.Monoid#ApplicativeMonoid is not part of the API in scalaz-core_2.11-7.1.1.jar version, so a later change to it will no longer be reported, though it would break clients using it today (scalaz.Monoid#ApplicativeMonoid escaped through scalaz.Monoid#ApplicativeMonoid##anonfun#1.this)
+    |private trait scalaz.std.Tuple1Cozip is not part of the API in scalaz-core_2.11-7.1.1.jar version, so a later change to it will no longer be reported, though it would break clients using it today (scalaz.std.Tuple1Cozip escaped as a parent of class scalaz.std.TupleInstances1##anon#57)
+    |private trait scalaz.std.Tuple1Functor is not part of the API in scalaz-core_2.11-7.1.1.jar version, so a later change to it will no longer be reported, though it would break clients using it today (scalaz.std.Tuple1Functor escaped as a parent of class scalaz.std.TupleInstances0##anon#1)
+    |private trait scalaz.std.Tuple1Monad is not part of the API in scalaz-core_2.11-7.1.1.jar version, so a later change to it will no longer be reported, though it would break clients using it today (scalaz.std.Tuple1Monad escaped as a parent of class scalaz.std.TupleInstances0##anon#1)
+    |private[..] class scalaz.Free#Return is not part of the API in scalaz-core_2.11-7.1.1.jar version, so a later change to it will no longer be reported, though it would break clients using it today (scalaz.Free#Return escaped through scalaz.TrampolineInstances##anon#2.cojoin)
+    |private[..] trait scalaz.Semigroup#ApplySemigroup is not part of the API in scalaz-core_2.11-7.1.1.jar version, so a later change to it will no longer be reported, though it would break clients using it today (scalaz.Semigroup#ApplySemigroup escaped as a parent of trait scalaz.Monoid#ApplicativeMonoid, through scalaz.Monoid#ApplicativeMonoid##anonfun#1.this)""".stripMargin
 
   it("MimaWeb") {
     withServer { port =>
