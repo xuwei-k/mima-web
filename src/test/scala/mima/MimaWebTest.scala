@@ -1,9 +1,13 @@
 package mima
 
 import unfiltered.jetty.Server
-
-import scalaj.http._
 import org.scalatest.funspec.AnyFunSpec
+
+import java.net.URI
+import java.net.http.HttpResponse.BodyHandlers
+import java.net.http.{HttpClient, HttpRequest, HttpResponse}
+import java.nio.charset.StandardCharsets
+import java.time.Duration
 
 class MimaWebTest extends AnyFunSpec {
   def withServer[A](action: Int => A): A = {
@@ -35,34 +39,31 @@ class MimaWebTest extends AnyFunSpec {
     |private[..] class scalaz.Free#Return is not part of the API in scalaz-core_2.11-7.1.1.jar version, so a later change to it will no longer be reported, though it would break clients using it today (scalaz.Free#Return escaped through scalaz.TrampolineInstances##anon#2.cojoin)
     |private[..] trait scalaz.Semigroup#ApplySemigroup is not part of the API in scalaz-core_2.11-7.1.1.jar version, so a later change to it will no longer be reported, though it would break clients using it today (scalaz.Semigroup#ApplySemigroup escaped as a parent of trait scalaz.Monoid#ApplicativeMonoid, through scalaz.Monoid#ApplicativeMonoid##anonfun#1.this)""".stripMargin
 
-  it("MimaWeb") {
-    val defaultOptions: Seq[HttpOptions.HttpOption] = Seq(
-      _.setConnectTimeout(30000),
-      _.setReadTimeout(30000)
-    )
+  private def createRequest(uri: String) = HttpRequest
+    .newBuilder()
+    .uri(URI.create(uri))
+    .timeout(Duration.ofSeconds(30))
+    .build()
 
+  it("MimaWeb") {
     withServer { port =>
+      val client = HttpClient.newHttpClient()
+      def get(uri: String): HttpResponse[String] =
+        client.send(createRequest(uri), BodyHandlers.ofString(StandardCharsets.UTF_8))
+
       // https://github.com/scalaz/scalaz/issues/1199
-      val request =
-        Http(s"http://localhost:$port/org.scalaz/scalaz-core_2.11")
-          .param("previous", "7.1.0")
-          .param("current", "7.1.1")
-          .options(defaultOptions)
-      val response = request.asString
-      assert(response.code == 200)
+      val response = get(s"http://localhost:$port/org.scalaz/scalaz-core_2.11?previous=7.1.0&current=7.1.1")
+      assert(response.statusCode == 200)
       assert(response.body == expect)
 
-      val artifacts = Http(s"http://localhost:$port/org.scalaz")
-      val res1 = artifacts.asString
-      assert(res1.code == 200, res1.body)
+      val res1 = get(s"http://localhost:$port/org.scalaz")
+      assert(res1.statusCode == 200, res1.body)
 
-      val versions1 = Http(s"http://localhost:$port/org.scalaz/scalaz-core_2.12")
-      val res2 = versions1.asString
-      assert(res2.code == 200, res2.body)
+      val res2 = get(s"http://localhost:$port/org.scalaz/scalaz-core_2.12")
+      assert(res2.statusCode == 200, res2.body)
 
-      val versions2 = Http(s"http://localhost:$port/org.scalaz/scalaz-core_2.12?current=7.2.8")
-      val res3 = versions2.asString
-      assert(res3.code == 200, res3.body)
+      val res3 = get(s"http://localhost:$port/org.scalaz/scalaz-core_2.12?current=7.2.8")
+      assert(res3.statusCode == 200, res3.body)
       assert(res2.body.length > res3.body.length)
     }
   }
