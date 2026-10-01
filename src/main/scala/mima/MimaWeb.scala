@@ -1,14 +1,21 @@
 package mima
 
 import java.io.File
-
 import com.typesafe.tools.mima.core.Problem
 import com.typesafe.tools.mima.core.util.log.Logging
 import sbt.io.IO
 import unfiltered.filter.Plan.Intent
 import unfiltered.jetty.{Server, SocketPortBinding}
 import unfiltered.request._
-import unfiltered.response.{Html5, InternalServerError, Ok, ResponseString, Status}
+import unfiltered.response.{
+  ComposeResponse,
+  HtmlContent,
+  InternalServerError,
+  Ok,
+  ResponseFunction,
+  ResponseString,
+  Status
+}
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -19,7 +26,7 @@ import scalaz.Nondeterminism
 import scala.collection.mutable.ListBuffer
 
 object MimaWeb extends unfiltered.filter.Plan {
-  private[this] val download: Library => Future[Either[String, Array[Byte]]] = { lib =>
+  private val download: Library => Future[Either[String, Array[Byte]]] = { lib =>
     coursier
       .Fetch()
       .addDependencies(lib.toCoursier)
@@ -31,34 +38,38 @@ object MimaWeb extends unfiltered.filter.Plan {
               Right(IO.readBytes(f))
           }
           .getOrElse(Left(s"not found $lib"))
-      )(ExecutionContext.global)
+      )(using ExecutionContext.global)
   }
 
-  private[this] val cacheJars: Cache[Library, Array[Byte], String] =
+  private val cacheJars: Cache[Library, Array[Byte], String] =
     new Cache(download)
-  private[this] val cacheVersions: Cache[(String, String), List[String], String] =
-    new Cache({ x => Future(versions(Library.MavenCentral, x._1, x._2))(ExecutionContext.global) })
+  private val cacheVersions: Cache[(String, String), List[String], String] =
+    new Cache({ x => Future(versions(Library.MavenCentral, x._1, x._2))(using ExecutionContext.global) })
 
   class StrParam(val name: String) {
     def unapply(p: Params.Map): Option[String] =
       p.get(name).flatMap(_.headOption)
   }
 
-  private[this] val Current = new StrParam("current")
-  private[this] val Previous = new StrParam("previous")
+  private val Current = new StrParam("current")
+  private val Previous = new StrParam("previous")
 
-  private[this] val instance: Nondeterminism[Future] =
-    scalaz.std.scalaFuture.futureInstance(ExecutionContext.global)
+  private val instance: Nondeterminism[Future] =
+    scalaz.std.scalaFuture.futureInstance(using ExecutionContext.global)
 
-  private def returnHtml(x: Elem) =
-    Html5(
-      <html>
-      <head>
-        <title>migration-manager web API</title>
-        <meta name="robots" content="noindex,nofollow" />
-      </head>
-      <body><div>{x}</div></body>
-    </html>
+  private def returnHtml(x: Elem): ResponseFunction[jakarta.servlet.http.HttpServletResponse] =
+    new ComposeResponse(
+      HtmlContent ~> ResponseString(
+        (
+          <html>
+            <head>
+              <title>migration-manager web API</title>
+              <meta name="robots" content="noindex,nofollow" />
+            </head>
+            <body><div>{x}</div></body>
+          </html>
+        ).toString
+      )
     )
 
   private final val baseURL = "https://migration-manager.herokuapp.com/"

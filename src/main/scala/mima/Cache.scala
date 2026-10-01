@@ -6,19 +6,19 @@ import scala.concurrent.{ExecutionContext, Future}
 
 final class Cache[K, V >: Null, E](newValue: K => Future[Either[E, V]]) { self =>
 
-  private[this] val map = new java.util.WeakHashMap[K, WeakReference[V]]
+  private val map = new java.util.WeakHashMap[K, WeakReference[V]]
 
   def get(name: K): Future[Either[E, V]] = {
     def cached(): V = {
       val reference = self.synchronized {
-        map get name
+        map.get(name)
       }
       if (reference == null) null
       else reference.get
     }
     def updateCache(): Future[Either[E, V]] = {
       self.synchronized {
-        map remove name
+        map.remove(name)
       }
       newValue(name).map {
         case x @ Right(v) =>
@@ -28,7 +28,7 @@ final class Cache[K, V >: Null, E](newValue: K => Future[Either[E, V]]) { self =
           x
         case l =>
           l
-      }(ExecutionContext.global)
+      }(using ExecutionContext.global)
     }
 
     val res = cached()
