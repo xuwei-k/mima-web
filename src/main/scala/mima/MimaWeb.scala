@@ -14,32 +14,27 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.control.NonFatal
 import scala.xml.{Elem, XML}
-import scalaj.http.HttpOptions
 import scalaz.Nondeterminism
 
 import scala.collection.mutable.ListBuffer
 
 object MimaWeb extends unfiltered.filter.Plan {
-  val defaultOptions: Seq[HttpOptions.HttpOption] = Seq(
-    _.setConnectTimeout(30000),
-    _.setReadTimeout(30000)
-  )
-
-  private[this] val download: Library => Future[Either[Int, Array[Byte]]] = { lib =>
-    Future {
-      val req = scalaj.http.Http(lib.mavenCentralURL).options(defaultOptions)
-      println(s"downloading from ${lib.mavenCentralURL}")
-      val res = req.asBytes
-      println("status = " + res.code + " " + lib.mavenCentralURL)
-      if (res.code == 200) {
-        Right(res.body)
-      } else {
-        Left(res.code)
-      }
-    }(ExecutionContext.global)
+  private[this] val download: Library => Future[Either[String, Array[Byte]]] = { lib =>
+    coursier
+      .Fetch()
+      .addDependencies(lib.toCoursier)
+      .futureResult()
+      .map(
+        _.detailedArtifacts0
+          .collectFirst {
+            case (a, _, _, f) if a.module == lib.toCoursier.module =>
+              Right(IO.readBytes(f))
+          }
+          .getOrElse(Left(s"not found $lib"))
+      )(ExecutionContext.global)
   }
 
-  private[this] val cacheJars: Cache[Library, Array[Byte], Int] =
+  private[this] val cacheJars: Cache[Library, Array[Byte], String] =
     new Cache(download)
   private[this] val cacheArtifacts: Cache[String, List[String], httpz.Error] =
     new Cache(MavenSearch.searchByGroupId)
@@ -108,10 +103,10 @@ object MimaWeb extends unfiltered.filter.Plan {
             res0
           }
           Ok ~> ResponseString(res)
-        case (Left(code), _) =>
-          Status(code) ~> ResponseString(s"status = $code. error while downloading ${current.mavenCentralURL}")
-        case (_, Left(code)) =>
-          Status(code) ~> ResponseString(s"status = $code. error while downloading ${current.mavenCentralURL}")
+        case (Left(err), _) =>
+          Status(400) ~> ResponseString(s"error while downloading ${current.mavenCentralURL} ${err}")
+        case (_, Left(err)) =>
+          Status(400) ~> ResponseString(s"error while downloading ${current.mavenCentralURL} ${err}")
       }
       Await.result(result, 29.seconds)
 
