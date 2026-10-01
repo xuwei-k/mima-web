@@ -2,9 +2,15 @@ name := "mima-web"
 
 licenses += ("MIT License" -> uri("http://www.opensource.org/licenses/mit-license"))
 
-scalaVersion := "2.13.18"
+scalaVersion := "3.9.0"
 
-scalacOptions ++= "-deprecation" :: "-unchecked" :: "-feature" :: Nil
+scalacOptions ++= Seq(
+  "-deprecation",
+  "-unchecked",
+  "-feature",
+  "-Werror",
+  "-Wunused:all"
+)
 
 Test / fork := true
 
