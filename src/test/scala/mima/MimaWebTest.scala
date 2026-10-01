@@ -36,13 +36,18 @@ class MimaWebTest extends AnyFunSpec {
     |private[..] trait scalaz.Semigroup#ApplySemigroup is not part of the API in scalaz-core_2.11-7.1.1.jar version, so a later change to it will no longer be reported, though it would break clients using it today (scalaz.Semigroup#ApplySemigroup escaped as a parent of trait scalaz.Monoid#ApplicativeMonoid, through scalaz.Monoid#ApplicativeMonoid##anonfun#1.this)""".stripMargin
 
   it("MimaWeb") {
+    val defaultOptions: Seq[HttpOptions.HttpOption] = Seq(
+      _.setConnectTimeout(30000),
+      _.setReadTimeout(30000)
+    )
+
     withServer { port =>
       // https://github.com/scalaz/scalaz/issues/1199
       val request =
         Http(s"http://localhost:$port/org.scalaz/scalaz-core_2.11")
           .param("previous", "7.1.0")
           .param("current", "7.1.1")
-          .options(MimaWeb.defaultOptions)
+          .options(defaultOptions)
       val response = request.asString
       assert(response.code == 200)
       assert(response.body == expect)

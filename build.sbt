@@ -16,7 +16,8 @@ libraryDependencies ++= Seq(
   "org.scala-sbt" %% "io" % "1.13.3",
   "io.github.argonaut-io" %% "argonaut-scalaz" % "6.3.13",
   "com.github.xuwei-k" %% "httpz-native" % "0.8.0",
-  "org.scalaj" %% "scalaj-http" % "2.4.2"
+  "org.scalaj" %% "scalaj-http" % "2.4.2" % Test,
+  "io.get-coursier" %% "coursier" % "2.1.26"
 )
 
 enablePlugins(JavaAppPackaging)
