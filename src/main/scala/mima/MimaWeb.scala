@@ -36,8 +36,6 @@ object MimaWeb extends unfiltered.filter.Plan {
 
   private[this] val cacheJars: Cache[Library, Array[Byte], String] =
     new Cache(download)
-  private[this] val cacheArtifacts: Cache[String, List[String], httpz.Error] =
-    new Cache(MavenSearch.searchByGroupId)
   private[this] val cacheVersions: Cache[(String, String), List[String], String] =
     new Cache({ x => Future(versions(Library.MavenCentral, x._1, x._2))(ExecutionContext.global) })
 
@@ -66,18 +64,6 @@ object MimaWeb extends unfiltered.filter.Plan {
   private final val baseURL = "https://migration-manager.herokuapp.com/"
 
   override val intent: Intent = {
-    case GET(Path(Seg(groupId :: Nil))) =>
-      Await.result(cacheArtifacts.get(groupId), 29.seconds) match {
-        case Left(e) =>
-          InternalServerError ~> ResponseString(e.toString)
-        case Right(artifacts) =>
-          returnHtml(
-            <div>{
-              artifacts.map { a => <li><a href={s"${baseURL}$groupId/${a}"}>{a}</a></li> }
-            }</div>
-          )
-      }
-
     case GET(Path(Seg(groupId :: artifactId :: Nil)) & Params(param @ Previous(p) & Current(c))) =>
       val debug = param.get("debug").exists(_.contains("true"))
       val previous = Library(groupId, artifactId, p)
