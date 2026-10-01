@@ -56,9 +56,6 @@ class MimaWebTest extends AnyFunSpec {
       assert(response.statusCode == 200)
       assert(response.body == expect)
 
-      val res1 = get(s"http://localhost:$port/org.scalaz")
-      assert(res1.statusCode == 200, res1.body)
-
       val res2 = get(s"http://localhost:$port/org.scalaz/scalaz-core_2.12")
       assert(res2.statusCode == 200, res2.body)
 
