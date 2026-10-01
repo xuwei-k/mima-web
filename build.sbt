@@ -1,6 +1,6 @@
 name := "mima-web"
 
-licenses += ("MIT License" -> url("http://www.opensource.org/licenses/mit-license"))
+licenses += ("MIT License" -> uri("http://www.opensource.org/licenses/mit-license"))
 
 scalaVersion := "2.13.18"
 
