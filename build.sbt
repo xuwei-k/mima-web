@@ -21,7 +21,7 @@ libraryDependencies ++= Seq(
   "ws.unfiltered" %% "unfiltered-jetty" % unfilteredVersion,
   "org.scalatest" %% "scalatest" % "3.2.20" % "test",
   "com.typesafe" %% "mima-core" % "1.2.1",
-  "org.scala-sbt" %% "io" % "1.13.4",
+  "org.scala-sbt" %% "io" % "1.13.5",
   "io.github.argonaut-io" %% "argonaut-scalaz" % "6.3.13",
   "io.get-coursier" %% "coursier" % "2.1.26"
 )
